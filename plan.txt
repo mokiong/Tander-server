@@ -9,13 +9,8 @@ Match:
    user2Response  (accept,decline,def: pending)
    user1(FK)   (Many to One with User)
    user2(FK)   (Many to One with User)
-   
-
-Inbox:
-   user1(FK)   (Many to One with User)
-   user2(FK)   (Many to One with User)
-   messageId (FK) (One to Many with message)
 
 Message:
-   userId (FK) (Many to One with User)
+   user1(FK) (Many to One with User)
+   user2(FK)   (Many to One with User)
    text

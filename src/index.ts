@@ -13,6 +13,7 @@ import { Session as SessionEntity } from './entities/Session';
 import { User } from './entities/User';
 import { UserResolver } from './resolvers/user';
 import { Match } from './entities/Match';
+import { MatchResolver } from './resolvers/match';
 
 const main = async () => {
    const PORT = parseInt(process.env.PORT as string) || 4000;
@@ -25,16 +26,16 @@ const main = async () => {
       synchronize: !__prod__, // synchronize false during prod
       logging: true,
       migrations: [path.join(__dirname, './migrations/*')],
-      entities: [User, Match],
+      entities: [User, Match, SessionEntity],
    });
 
+   await Match.delete({});
    // await User.delete({});
-   // await Channel.delete({});
    // await conn.runMigrations();
 
    const apolloServer = new ApolloServer({
       schema: await buildSchema({
-         resolvers: [UserResolver],
+         resolvers: [UserResolver, MatchResolver],
          validate: false,
       }),
       // CONTEXT - a special object accesible by all reslovers

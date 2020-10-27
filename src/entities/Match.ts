@@ -3,8 +3,10 @@ import { Field, ObjectType } from 'type-graphql';
 import {
    BaseEntity,
    CreateDateColumn,
+   JoinColumn,
    ManyToOne,
    PrimaryColumn,
+   PrimaryGeneratedColumn,
    UpdateDateColumn,
 } from 'typeorm';
 import { Column } from 'typeorm/decorator/columns/Column';
@@ -15,12 +17,8 @@ import { User } from './User';
 @Entity()
 export class Match extends BaseEntity {
    @Field()
-   @PrimaryColumn()
-   user1id!: number;
-
-   @Field()
-   @PrimaryColumn()
-   user2id!: number;
+   @PrimaryGeneratedColumn()
+   id!: number;
 
    @Field()
    @Column({ default: 0 })
@@ -30,11 +28,11 @@ export class Match extends BaseEntity {
    @Column({ default: 0 })
    userResponse2!: number;
 
-   @ManyToOne(() => User, (user) => user.matches)
-   initiator!: User;
+   @ManyToOne(() => User)
+   user1!: User;
 
    @ManyToOne(() => User)
-   initiated!: User;
+   user2!: User;
 
    @Field(() => String)
    @CreateDateColumn()

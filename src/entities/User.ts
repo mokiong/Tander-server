@@ -27,10 +27,6 @@ export class User extends BaseEntity {
    @Column({ unique: true })
    email!: string;
 
-   @Field(() => Match)
-   @OneToMany(() => Match, (match) => match.initiator)
-   matches: Match[];
-
    @Column()
    password!: string;
 
