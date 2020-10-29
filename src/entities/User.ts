@@ -3,13 +3,11 @@ import { Field, ObjectType } from 'type-graphql';
 import {
    BaseEntity,
    CreateDateColumn,
-   OneToMany,
    PrimaryGeneratedColumn,
    UpdateDateColumn,
 } from 'typeorm';
 import { Column } from 'typeorm/decorator/columns/Column';
 import { Entity } from 'typeorm/decorator/entity/Entity';
-import { Match } from './Match';
 
 @ObjectType()
 @Entity()

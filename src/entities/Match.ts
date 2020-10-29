@@ -3,9 +3,7 @@ import { Field, ObjectType } from 'type-graphql';
 import {
    BaseEntity,
    CreateDateColumn,
-   JoinColumn,
    ManyToOne,
-   PrimaryColumn,
    PrimaryGeneratedColumn,
    UpdateDateColumn,
 } from 'typeorm';
