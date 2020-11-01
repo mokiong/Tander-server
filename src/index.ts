@@ -20,7 +20,7 @@ const main = async () => {
 
    const app = express();
 
-   const conn = await createConnection({
+   await createConnection({
       type: 'postgres',
       url: process.env.DATABASE_URL,
       synchronize: !__prod__, // synchronize false during prod
@@ -29,7 +29,7 @@ const main = async () => {
       entities: [User, Match, SessionEntity],
    });
 
-   await Match.delete({});
+   // await Match.delete({});
    // await User.delete({});
    // await conn.runMigrations();
 

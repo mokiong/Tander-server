@@ -16,6 +16,7 @@ import { MyContext } from '../utilities/types';
 import { UserInput } from '../utilities/userInput';
 import { validateRegister } from '../utilities/validateRegister';
 import argon2 from 'argon2';
+import { COOKIE_NAME } from '../utilities/constants';
 
 @ObjectType()
 class FieldError {
@@ -80,7 +81,9 @@ export class UserResolver {
    @Query(() => Me)
    async me(@Ctx() { req }: MyContext) {
       if (!req.session.userId) {
-         return null;
+         return {
+            id: null,
+         };
       }
       const user = await User.findOne(req.session.userId, {
          select: ['username', 'id', 'email'],
@@ -100,6 +103,21 @@ export class UserResolver {
    }
 
    // Mutations
+   @Mutation(() => Boolean)
+   logout(@Ctx() { req, res }: MyContext) {
+      return new Promise((resolve) =>
+         req.session.destroy((err) => {
+            if (err) {
+               console.log(err);
+               resolve(false);
+               return;
+            }
+            res.clearCookie(COOKIE_NAME);
+            resolve(true);
+         })
+      );
+   }
+
    @Mutation(() => UserResponse)
    async login(
       @Arg('usernameOrEmail') usernameOrEmail: String,
