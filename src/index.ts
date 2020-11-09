@@ -14,6 +14,7 @@ import { User } from './entities/User';
 import { UserResolver } from './resolvers/user';
 import { Match } from './entities/Match';
 import { MatchResolver } from './resolvers/match';
+import { getIpv4 } from './getIpv4';
 
 const main = async () => {
    const PORT = parseInt(process.env.PORT as string) || 4000;
@@ -49,7 +50,7 @@ const main = async () => {
    // Middlewares
    app.use(
       cors({
-         origin: process.env.CORS_ORIGIN,
+         origin: __prod__ ? process.env.CORS_ORIGIN : getIpv4,
          credentials: true,
       })
    );

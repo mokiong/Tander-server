@@ -3,3 +3,4 @@ dist
 .prettierrc
 .txt
 .env
+getIpv4.ts
