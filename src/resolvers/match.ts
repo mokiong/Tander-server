@@ -13,6 +13,7 @@ import {
 } from 'type-graphql';
 import { MyContext } from '../utilities/types';
 import { User } from '../entities/User';
+import { Message } from '../entities/Message';
 
 @ObjectType()
 class MatchOutput {
@@ -26,6 +27,16 @@ class MatchOutput {
 
 @Resolver(Match)
 export class MatchResolver {
+   @FieldResolver(() => [Message])
+   async inbox(@Root() match: Match, @Ctx() { req }: MyContext) {
+      // await Message.find({
+      //    where: [
+      //       { userId: req.session.userId, receiverId: 1},
+      //       { userId: , receiverId: req.session.userId},
+      //    ],
+      // });
+   }
+
    @FieldResolver(() => User)
    async user1(@Root() match: Match): Promise<User | undefined> {
       const user = await User.findOne({ id: match.user1.id });

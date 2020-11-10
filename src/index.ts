@@ -15,6 +15,8 @@ import { UserResolver } from './resolvers/user';
 import { Match } from './entities/Match';
 import { MatchResolver } from './resolvers/match';
 import { getIpv4 } from './getIpv4';
+import { MessageResolver } from './resolvers/message';
+import { Message } from './entities/Message';
 
 const main = async () => {
    const PORT = parseInt(process.env.PORT as string) || 4000;
@@ -27,7 +29,7 @@ const main = async () => {
       synchronize: !__prod__, // synchronize false during prod
       logging: true,
       migrations: [path.join(__dirname, './migrations/*')],
-      entities: [User, Match, SessionEntity],
+      entities: [User, Match, SessionEntity, Message],
    });
 
    // await Match.delete({});
@@ -36,7 +38,7 @@ const main = async () => {
 
    const apolloServer = new ApolloServer({
       schema: await buildSchema({
-         resolvers: [UserResolver, MatchResolver],
+         resolvers: [UserResolver, MatchResolver, MessageResolver],
          validate: false,
       }),
       // CONTEXT - a special object accesible by all reslovers
@@ -50,7 +52,9 @@ const main = async () => {
    // Middlewares
    app.use(
       cors({
-         origin: __prod__ ? process.env.CORS_ORIGIN : getIpv4,
+         // home test
+         // origin: __prod__ ? process.env.CORS_ORIGIN : getIpv4,
+         origin: process.env.CORS_ORIGIN,
          credentials: true,
       })
    );

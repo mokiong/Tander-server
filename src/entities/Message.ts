@@ -1,3 +1,4 @@
+import { TransformRootFields } from 'apollo-server-express';
 import { Field, ObjectType } from 'type-graphql';
 import {
    Entity,
@@ -6,6 +7,7 @@ import {
    Column,
    ManyToOne,
 } from 'typeorm';
+import { Match } from './Match';
 import { User } from './User';
 
 @ObjectType()

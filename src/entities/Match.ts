@@ -4,11 +4,13 @@ import {
    BaseEntity,
    CreateDateColumn,
    ManyToOne,
+   OneToMany,
    PrimaryGeneratedColumn,
    UpdateDateColumn,
 } from 'typeorm';
 import { Column } from 'typeorm/decorator/columns/Column';
 import { Entity } from 'typeorm/decorator/entity/Entity';
+import { Message } from './Message';
 import { User } from './User';
 
 @ObjectType()
