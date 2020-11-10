@@ -32,7 +32,7 @@ const main = async () => {
       entities: [User, Match, SessionEntity, Message],
    });
 
-   // await Match.delete({});
+   // await Message.delete({});
    // await User.delete({});
    // await conn.runMigrations();
 

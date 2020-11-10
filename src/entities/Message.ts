@@ -1,4 +1,3 @@
-import { TransformRootFields } from 'apollo-server-express';
 import { Field, ObjectType } from 'type-graphql';
 import {
    Entity,
@@ -6,8 +5,9 @@ import {
    PrimaryGeneratedColumn,
    Column,
    ManyToOne,
+   CreateDateColumn,
+   UpdateDateColumn,
 } from 'typeorm';
-import { Match } from './Match';
 import { User } from './User';
 
 @ObjectType()
@@ -35,4 +35,12 @@ export class Message extends BaseEntity {
 
    @ManyToOne(() => User)
    receiver!: User;
+
+   @Field(() => String)
+   @CreateDateColumn()
+   createdAt: Date;
+
+   @Field(() => String)
+   @UpdateDateColumn()
+   updatedAt: Date;
 }

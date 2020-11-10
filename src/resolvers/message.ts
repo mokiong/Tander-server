@@ -2,9 +2,11 @@ import { Message } from '../entities/Message';
 import {
    Arg,
    Ctx,
+   Field,
    FieldResolver,
    Int,
    Mutation,
+   ObjectType,
    Query,
    Resolver,
    Root,
@@ -12,24 +14,38 @@ import {
 import { MyContext } from '../utilities/types';
 import { User } from '../entities/User';
 
+@ObjectType()
+class InboxOutput {
+   // ? means undefined
+   @Field({ nullable: true })
+   username?: string;
+
+   @Field({ nullable: true })
+   latestText?: string;
+}
+
 @Resolver(Message)
 export class MessageResolver {
    //Queries
-   @FieldResolver(() => String)
-   async matchUsername(@Root() message: Message) {
+   @FieldResolver(() => User)
+   async receiver(@Root() message: Message): Promise<User | null> {
       const user = await User.findOne({
          where: { id: message.receiverId },
-         select: ['username'],
       });
 
       if (!user) {
          return null;
       }
 
-      const capitalizedUsername =
+      user.username =
          user!.username.charAt(0).toUpperCase() + user!.username.slice(1);
 
-      return capitalizedUsername;
+      return user;
+   }
+
+   @Query(() => [InboxOutput])
+   async inbox(@Ctx() { req }: MyContext): Promise<InboxOutput[]> {
+      await Message.find({ id: req.session.userId });
    }
 
    @Query(() => [Message])
