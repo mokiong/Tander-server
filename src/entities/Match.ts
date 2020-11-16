@@ -6,10 +6,12 @@ import {
    ManyToOne,
    PrimaryGeneratedColumn,
    UpdateDateColumn,
+   OneToMany,
 } from 'typeorm';
 import { Column } from 'typeorm/decorator/columns/Column';
 import { Entity } from 'typeorm/decorator/entity/Entity';
 import { User } from './User';
+import { Message } from './Message';
 
 @ObjectType()
 @Entity()
@@ -25,6 +27,13 @@ export class Match extends BaseEntity {
    @Field()
    @Column({ default: 0 })
    userResponse2!: number;
+
+   @OneToMany(
+      () => Message,
+      (message) => message.match,
+      { nullable: true }
+   )
+   messages?: Message[] | null;
 
    @ManyToOne(() => User)
    user1!: User;

@@ -17,6 +17,7 @@ import { UserInput } from '../utilities/userInput';
 import { validateRegister } from '../utilities/validateRegister';
 import argon2 from 'argon2';
 import { COOKIE_NAME } from '../utilities/constants';
+import { Message } from '../entities/Message';
 
 @ObjectType()
 class FieldError {
@@ -51,30 +52,54 @@ class UserResponse {
    user?: User;
 }
 
+@ObjectType()
+class InboxOutput {
+   // ? means undefined
+   @Field({ nullable: true })
+   username?: string;
+
+   @Field({ nullable: true })
+   latestMessage?: string;
+}
+
 @Resolver(User)
 export class UserResolver {
-   @FieldResolver(() => [User])
-   async matches(
-      @Root() user: User,
-      @Ctx() { req }: MyContext
-   ): Promise<User[]> {
+   @FieldResolver(() => [InboxOutput])
+   async inbox(@Root() user: User): Promise<InboxOutput[]> {
       const matches = await Match.find({
          where: [
-            { user1: req.session.userId, userResponse1: 1, userResponse2: 1 },
-            { user2: req.session.userId, userResponse1: 1, userResponse2: 1 },
+            { user1: user.id, userResponse1: 1, userResponse2: 1 },
+            { user2: user.id, userResponse1: 1, userResponse2: 1 },
          ],
          relations: ['user1', 'user2'],
       });
 
-      const userArray: User[] = [];
-      matches.map((match) => {
-         match.user1.id !== user.id
-            ? userArray.push(match.user1)
-            : userArray.push(match.user2);
-      });
-      console.log(userArray);
+      if (matches.length === 0) {
+         return [];
+      }
 
-      return userArray;
+      const matchPromise = matches.map(async ({user1, user2}) => {
+         // get last message for match inbox
+         const latestMessage = await Message.findOne({
+            where: [
+               { userId: user1.id, receiverId: user2.id },
+               { userId: user2.id, receiverId: user1.id },
+            ],
+            order: {
+               createdAt: 'DESC',
+            },
+         });
+
+         return {
+            username:
+               user1.id !== user.id
+                  ? user1.username
+                  : user2.username,
+            latestMessage: latestMessage ? latestMessage.text : '',
+         };
+      });
+
+      return await Promise.all(matchPromise);
    }
 
    // Queries

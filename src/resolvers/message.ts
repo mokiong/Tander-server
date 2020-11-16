@@ -2,27 +2,16 @@ import { Message } from '../entities/Message';
 import {
    Arg,
    Ctx,
-   Field,
    FieldResolver,
    Int,
    Mutation,
-   ObjectType,
    Query,
    Resolver,
    Root,
 } from 'type-graphql';
 import { MyContext } from '../utilities/types';
 import { User } from '../entities/User';
-
-@ObjectType()
-class InboxOutput {
-   // ? means undefined
-   @Field({ nullable: true })
-   username?: string;
-
-   @Field({ nullable: true })
-   latestText?: string;
-}
+import { Match } from '../entities/Match';
 
 @Resolver(Message)
 export class MessageResolver {
@@ -41,11 +30,6 @@ export class MessageResolver {
          user!.username.charAt(0).toUpperCase() + user!.username.slice(1);
 
       return user;
-   }
-
-   @Query(() => [InboxOutput])
-   async inbox(@Ctx() { req }: MyContext): Promise<InboxOutput[]> {
-      await Message.find({ id: req.session.userId });
    }
 
    @Query(() => [Message])
@@ -74,14 +58,33 @@ export class MessageResolver {
       @Ctx() { req }: MyContext
    ) {
       try {
-         const user = await User.findOne({ id: req.session.userId });
-         const receiver = await User.findOne({ id: userId });
+         const match = await Match.findOne({
+            where: [
+               { user1: req.session.userId, user2: userId },
+               { user2: req.session.userId, user1: userId },
+            ],
+            relations: ['user1', 'user2'],
+         });
 
-         await Message.create({
-            text,
-            user,
-            receiver,
-         }).save();
+         if (!match) {
+            return false;
+         }
+
+         if (match!.user1.id === req.session.userId) {
+            await Message.create({
+               text,
+               user: match!.user1,
+               receiver: match!.user2,
+               match,
+            }).save();
+         } else {
+            await Message.create({
+               text,
+               user: match!.user2,
+               receiver: match!.user1,
+               match,
+            }).save();
+         }
 
          return true;
       } catch (error) {

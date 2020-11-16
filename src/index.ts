@@ -27,12 +27,13 @@ const main = async () => {
       type: 'postgres',
       url: process.env.DATABASE_URL,
       synchronize: !__prod__, // synchronize false during prod
-      logging: true,
+      // logging: true,
       migrations: [path.join(__dirname, './migrations/*')],
       entities: [User, Match, SessionEntity, Message],
    });
 
    // await Message.delete({});
+   // await Match.delete({});
    // await User.delete({});
    // await conn.runMigrations();
 

@@ -93,6 +93,7 @@ export class MatchResolver {
             { id: existingMatch.id },
             { userResponse1: 1, userResponse2: 1 }
          );
+
          if (updatedMatch.affected !== 1) {
             return {
                error: 'Error updating in database',

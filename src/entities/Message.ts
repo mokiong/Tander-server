@@ -9,6 +9,7 @@ import {
    UpdateDateColumn,
 } from 'typeorm';
 import { User } from './User';
+import { Match } from './Match';
 
 @ObjectType()
 @Entity()
@@ -35,6 +36,12 @@ export class Message extends BaseEntity {
 
    @ManyToOne(() => User)
    receiver!: User;
+
+   @ManyToOne(
+      () => Match,
+      (match) => match.messages
+   )
+   match!: Match;
 
    @Field(() => String)
    @CreateDateColumn()
