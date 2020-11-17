@@ -17,6 +17,22 @@ import { Match } from '../entities/Match';
 export class MessageResolver {
    //Queries
    @FieldResolver(() => User)
+   async user(@Root() message: Message): Promise<User | null> {
+      const user = await User.findOne({
+         where: { id: message.userId },
+      });
+
+      if (!user) {
+         return null;
+      }
+
+      user.username =
+         user!.username.charAt(0).toUpperCase() + user!.username.slice(1);
+
+      return user;
+   }
+
+   @FieldResolver(() => User)
    async receiver(@Root() message: Message): Promise<User | null> {
       const user = await User.findOne({
          where: { id: message.receiverId },
@@ -42,6 +58,9 @@ export class MessageResolver {
             { userId: req.session.userId, receiverId },
             { userId: receiverId, receiverId: req.session.userId },
          ],
+         order: {
+            createdAt: 'ASC',
+         },
       });
    }
 

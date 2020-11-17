@@ -4,7 +4,6 @@ import {
    Ctx,
    Field,
    FieldResolver,
-   Int,
    Mutation,
    ObjectType,
    Query,
@@ -36,7 +35,7 @@ class Me {
    username?: String;
 
    @Field({ nullable: true })
-   id?: String;
+   id?: number;
 
    @Field({ nullable: true })
    email?: String;
@@ -54,9 +53,11 @@ class UserResponse {
 
 @ObjectType()
 class InboxOutput {
+   @Field()
+   id!: number;
    // ? means undefined
-   @Field({ nullable: true })
-   username?: string;
+   @Field()
+   username!: string;
 
    @Field({ nullable: true })
    latestMessage?: string;
@@ -78,7 +79,7 @@ export class UserResolver {
          return [];
       }
 
-      const matchPromise = matches.map(async ({user1, user2}) => {
+      const matchPromise = matches.map(async ({ user1, user2 }) => {
          // get last message for match inbox
          const latestMessage = await Message.findOne({
             where: [
@@ -91,11 +92,9 @@ export class UserResolver {
          });
 
          return {
-            username:
-               user1.id !== user.id
-                  ? user1.username
-                  : user2.username,
-            latestMessage: latestMessage ? latestMessage.text : '',
+            id: user1.id !== user.id ? user1.id : user2.id,
+            username: user1.id !== user.id ? user1.username : user2.username,
+            latestMessage: latestMessage ? latestMessage.text : undefined,
          };
       });
 
@@ -123,8 +122,8 @@ export class UserResolver {
    }
 
    @Query(() => User)
-   async user(@Arg('id', () => Int) id: number): Promise<User | undefined> {
-      return await User.findOne(id);
+   async user(@Ctx() { req }: MyContext): Promise<User | undefined> {
+      return await User.findOne({ id: req.session.userId });
    }
 
    // Mutations
