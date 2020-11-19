@@ -5,6 +5,7 @@ import {
    FieldResolver,
    Int,
    Mutation,
+   PubSub,
    Query,
    Resolver,
    Root,
@@ -12,6 +13,7 @@ import {
 import { MyContext } from '../utilities/types';
 import { User } from '../entities/User';
 import { Match } from '../entities/Match';
+import { PubSubEngine } from 'graphql-subscriptions';
 
 @Resolver(Message)
 export class MessageResolver {
@@ -72,6 +74,7 @@ export class MessageResolver {
    //Mutations
    @Mutation(() => Boolean)
    async message(
+      @PubSub() pubSub: PubSubEngine,
       @Arg('message') text: string,
       @Arg('userId', () => Int) userId: number,
       @Ctx() { req }: MyContext
@@ -85,24 +88,28 @@ export class MessageResolver {
             relations: ['user1', 'user2'],
          });
 
+         let newMessage;
+
          if (!match) {
             return false;
          }
 
          if (match!.user1.id === req.session.userId) {
-            await Message.create({
+            newMessage = await Message.create({
                text,
                user: match!.user1,
                receiver: match!.user2,
                match,
             }).save();
+            await pubSub.publish('MESSAGE', newMessage);
          } else {
-            await Message.create({
+            newMessage = await Message.create({
                text,
                user: match!.user2,
                receiver: match!.user1,
                match,
             }).save();
+            await pubSub.publish('MESSAGE', newMessage);
          }
 
          return true;

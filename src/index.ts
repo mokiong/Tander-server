@@ -9,19 +9,19 @@ import { buildSchema } from 'type-graphql';
 import { createConnection } from 'typeorm';
 import { COOKIE_NAME, __prod__ } from './utilities/constants';
 import { TypeormStore } from 'typeorm-store';
+
 import { Session as SessionEntity } from './entities/Session';
 import { User } from './entities/User';
 import { UserResolver } from './resolvers/user';
 import { Match } from './entities/Match';
 import { MatchResolver } from './resolvers/match';
-import { getIpv4 } from './getIpv4';
+// import { getIpv4 } from './getIpv4';
 import { MessageResolver } from './resolvers/message';
 import { Message } from './entities/Message';
 
 const main = async () => {
-   const PORT = parseInt(process.env.PORT as string) || 4000;
-
    const app = express();
+   const PORT = parseInt(process.env.PORT as string) || 4000;
 
    await createConnection({
       type: 'postgres',
