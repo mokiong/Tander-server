@@ -22,6 +22,7 @@ import { Message } from './entities/Message';
 const main = async () => {
    const app = express();
    const PORT = parseInt(process.env.PORT as string) || 4000;
+   const httpServer = require('http').Server(app);
 
    await createConnection({
       type: 'postgres',
@@ -51,6 +52,8 @@ const main = async () => {
    });
 
    // Middlewares
+   // install subscription handlers for apollo server
+   apolloServer.installSubscriptionHandlers(httpServer);
    app.use(
       cors({
          // home test
@@ -81,7 +84,8 @@ const main = async () => {
       cors: { origin: false },
    });
 
-   app.listen(PORT, () => {
+   // listen on http server non on app
+   httpServer.listen(PORT, () => {
       console.log(`Server starting at localhost: 4000`);
    });
 };

@@ -9,6 +9,7 @@ import {
    Query,
    Resolver,
    Root,
+   Subscription,
 } from 'type-graphql';
 import { MyContext } from '../utilities/types';
 import { User } from '../entities/User';
@@ -101,7 +102,7 @@ export class MessageResolver {
                receiver: match!.user2,
                match,
             }).save();
-            await pubSub.publish('MESSAGE', newMessage);
+            await pubSub.publish('NEW_MESSAGE', newMessage);
          } else {
             newMessage = await Message.create({
                text,
@@ -109,7 +110,7 @@ export class MessageResolver {
                receiver: match!.user1,
                match,
             }).save();
-            await pubSub.publish('MESSAGE', newMessage);
+            await pubSub.publish('NEW_MESSAGE', newMessage);
          }
 
          return true;
@@ -117,5 +118,11 @@ export class MessageResolver {
          console.log(error);
          return false;
       }
+   }
+
+   // Subscriptions
+   @Subscription(() => Message, { topics: 'NEW_MESSAGE' })
+   async newMessage(@Root() message: Message) {
+      return message;
    }
 }
