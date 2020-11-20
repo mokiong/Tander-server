@@ -9,6 +9,7 @@ import {
    Query,
    Resolver,
    Root,
+   Subscription,
 } from 'type-graphql';
 import { Match } from '../entities/Match';
 import { MyContext } from '../utilities/types';
@@ -242,5 +243,13 @@ export class UserResolver {
             ],
          };
       }
+   }
+
+   // Subscriptions
+   @Subscription(() => InboxOutput, { topics: 'LATEST_MESSAGE' })
+   async latestMessage(
+      @Root() latestMessage: InboxOutput
+   ): Promise<InboxOutput> {
+      return latestMessage;
    }
 }
