@@ -162,14 +162,15 @@ export class MessageResolver {
    }
 
    // Subscriptions
-   @Subscription(() => MessageSubscription, { topics: 'NEW_MESSAGE' })
+   @Subscription(() => MessageSubscription, {
+      topics: 'NEW_MESSAGE',
+      // topics: ({ args, payload, context }) => args.topic,
+   })
    async newMessage(
       @Root() message: MessageSubscription
    ): Promise<MessageSubscription> {
       console.log(message);
-      message.user.username =
-         message.user.username.charAt(0).toUpperCase() +
-         message.user.username.slice(1);
+
       return message;
    }
 }
