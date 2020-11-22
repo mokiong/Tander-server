@@ -17,6 +17,7 @@ import { MyContext } from '../utilities/types';
 import { User } from '../entities/User';
 import { Match } from '../entities/Match';
 import { PubSubEngine } from 'graphql-subscriptions';
+import { LessThan } from 'typeorm';
 
 @ObjectType()
 class UserOutput {
@@ -40,6 +41,9 @@ class MessageSubscription {
 
    @Field()
    receiverId!: number;
+
+   @Field()
+   createdAt!: string;
 }
 
 @Resolver(Message)
@@ -80,17 +84,47 @@ export class MessageResolver {
    @Query(() => [Message])
    async conversation(
       @Arg('receiverId', () => Int) receiverId: number,
+      @Arg('cursor', () => String, { nullable: true }) cursor: string | null,
+      @Arg('limit', () => Int) limit: number,
       @Ctx() { req }: MyContext
    ): Promise<Message[]> {
-      return Message.find({
-         where: [
-            { userId: req.session.userId, receiverId },
-            { userId: receiverId, receiverId: req.session.userId },
-         ],
-         order: {
-            createdAt: 'ASC',
-         },
-      });
+      let conversation;
+      let offsetTodate;
+
+      if (cursor) {
+         offsetTodate = new Date(parseInt(cursor));
+         conversation = await Message.find({
+            where: [
+               {
+                  userId: req.session.userId,
+                  receiverId,
+                  createdAt: LessThan(offsetTodate),
+               },
+               {
+                  userId: receiverId,
+                  receiverId: req.session.userId,
+                  createdAt: LessThan(offsetTodate),
+               },
+            ],
+            order: {
+               createdAt: 'DESC',
+            },
+            take: limit,
+         });
+      } else {
+         conversation = await Message.find({
+            where: [
+               { userId: req.session.userId, receiverId },
+               { userId: receiverId, receiverId: req.session.userId },
+            ],
+            order: {
+               createdAt: 'DESC',
+            },
+            take: limit,
+         });
+      }
+
+      return conversation;
    }
 
    @Query(() => [Message])
@@ -142,6 +176,7 @@ export class MessageResolver {
                username: newMessage.user.username,
             },
             receiverId: userId,
+            createdAt: newMessage.createdAt,
          });
 
          // create subscription for latest message
@@ -164,13 +199,10 @@ export class MessageResolver {
    // Subscriptions
    @Subscription(() => MessageSubscription, {
       topics: 'NEW_MESSAGE',
-      // topics: ({ args, payload, context }) => args.topic,
    })
    async newMessage(
       @Root() message: MessageSubscription
    ): Promise<MessageSubscription> {
-      console.log(message);
-
       return message;
    }
 }
