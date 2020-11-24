@@ -89,21 +89,21 @@ export class MessageResolver {
       @Ctx() { req }: MyContext
    ): Promise<Message[]> {
       let conversation;
-      let offsetTodate;
+      let cursorToData;
 
       if (cursor) {
-         offsetTodate = new Date(parseInt(cursor));
+         cursorToData = new Date(parseInt(cursor));
          conversation = await Message.find({
             where: [
                {
                   userId: req.session.userId,
                   receiverId,
-                  createdAt: LessThan(offsetTodate),
+                  createdAt: LessThan(cursorToData),
                },
                {
                   userId: receiverId,
                   receiverId: req.session.userId,
-                  createdAt: LessThan(offsetTodate),
+                  createdAt: LessThan(cursorToData),
                },
             ],
             order: {
@@ -168,16 +168,7 @@ export class MessageResolver {
          }).save();
 
          // create subscription for new message
-         await pubSub.publish('NEW_MESSAGE', {
-            id: newMessage.id,
-            text: newMessage.text,
-            user: {
-               id: newMessage.user.id,
-               username: newMessage.user.username,
-            },
-            receiverId: userId,
-            createdAt: newMessage.createdAt,
-         });
+         await pubSub.publish('NEW_MESSAGE', newMessage);
 
          // create subscription for latest message
          await pubSub.publish('LATEST_MESSAGE', {
@@ -197,7 +188,7 @@ export class MessageResolver {
    }
 
    // Subscriptions
-   @Subscription(() => MessageSubscription, {
+   @Subscription(() => Message, {
       topics: 'NEW_MESSAGE',
    })
    async newMessage(
