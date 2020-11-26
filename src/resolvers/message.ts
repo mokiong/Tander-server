@@ -190,10 +190,21 @@ export class MessageResolver {
    // Subscriptions
    @Subscription(() => Message, {
       topics: 'NEW_MESSAGE',
+      // filter: ({ payload, args }) => {
+      //    if (
+      //       args.loggedUser === payload.userId &&
+      //       args.receiver === payload.receiverId
+      //    ) {
+      //       return true;
+      //    }
+      //    return false;
+      // },
    })
    async newMessage(
-      @Root() message: MessageSubscription
-   ): Promise<MessageSubscription> {
+      // @Arg('loggedUser') loggedUser: number,
+      // @Arg('receiver') receiver: number,
+      @Root() message: Message
+   ): Promise<Message> {
       return message;
    }
 }
