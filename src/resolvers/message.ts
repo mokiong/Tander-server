@@ -28,23 +28,23 @@ class UserOutput {
    username!: string;
 }
 
-@ObjectType()
-class MessageSubscription {
-   @Field()
-   id!: number;
+// @ObjectType()
+// class MessageSubscription {
+//    @Field()
+//    id!: number;
 
-   @Field(() => UserOutput)
-   user!: UserOutput;
+//    @Field(() => UserOutput)
+//    user!: UserOutput;
 
-   @Field({ nullable: true })
-   text?: string;
+//    @Field({ nullable: true })
+//    text?: string;
 
-   @Field()
-   receiverId!: number;
+//    @Field()
+//    receiverId!: number;
 
-   @Field()
-   createdAt!: string;
-}
+//    @Field()
+//    createdAt!: string;
+// }
 
 @Resolver(Message)
 export class MessageResolver {
@@ -83,6 +83,7 @@ export class MessageResolver {
 
    @Query(() => [Message])
    async conversation(
+      @Arg('loggedUserId', () => Int) _: number,
       @Arg('receiverId', () => Int) receiverId: number,
       @Arg('cursor', () => String, { nullable: true }) cursor: string | null,
       @Arg('limit', () => Int) limit: number,
@@ -190,19 +191,25 @@ export class MessageResolver {
    // Subscriptions
    @Subscription(() => Message, {
       topics: 'NEW_MESSAGE',
-      // filter: ({ payload, args }) => {
-      //    if (
-      //       args.loggedUser === payload.userId &&
-      //       args.receiver === payload.receiverId
-      //    ) {
-      //       return true;
-      //    }
-      //    return false;
-      // },
+      filter: ({ payload, args }) => {
+         console.log(args);
+         if (
+            (args.receiverId === payload.receiverId &&
+               args.loggedUserId === payload.userId) ||
+            (args.receiverId === payload.userId &&
+               args.loggedUserId === payload.receiverId)
+         ) {
+            console.log('true');
+            return true;
+         } else {
+            console.log(false);
+            return false;
+         }
+      },
    })
    async newMessage(
-      // @Arg('loggedUser') loggedUser: number,
-      // @Arg('receiver') receiver: number,
+      @Arg('loggedUserId', () => Int) _: number,
+      @Arg('receiverId', () => Int) __: number,
       @Root() message: Message
    ): Promise<Message> {
       return message;
